@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "iis-projekt"
+version = "0.1.0"
+description = ""
+authors = ["Tine Šuster <tine.suster@gmai>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
