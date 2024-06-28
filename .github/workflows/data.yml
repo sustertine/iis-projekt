@@ -1,8 +1,8 @@
 name: Data Pipeline, fetch, process, test, split
 
 on:
-#  schedule:
-#    - cron: '0 0 * * *'
+  #  schedule:
+  #    - cron: '0 0 * * *'
   push:
     branches:
       - develop
@@ -10,8 +10,8 @@ on:
 jobs:
   fetch-air-quality-data:
     runs-on: ubuntu-20.04
-#    env:
-#      AIR_QUALITY_API_URL: ${{ secrets.AIR_QUALITY_API_URL }} # TODO: Add secret
+    #    env:
+    #      AIR_QUALITY_API_URL: ${{ secrets.AIR_QUALITY_API_URL }} # TODO: Add secret
     permissions: write-all
 
     steps:
@@ -40,3 +40,185 @@ jobs:
         with:
           path: ./.venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+  fetch-weather-data:
+    needs: fetch-air-quality-data
+    runs-on: ubuntu-20.04
+    #    env:
+    #      AIR_QUALITY_API_URL: ${{ secrets.AIR_QUALITY_API_URL }} # TODO: Add secret
+    permissions: write-all
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.0'
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: uncache venv
+        uses: actions/cache@v3
+        with:
+          path: ./venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Run fetch air quality data script
+        run: |
+          poetry run python src/data/fetch_weather_data.py
+
+  process-data:
+    needs: fetch-weather-data
+    runs-on: ubuntu-20.04
+    #    env:
+    #      AIR_QUALITY_API_URL: ${{ secrets.AIR_QUALITY_API_URL }} # TODO: Add secret
+    permissions: write-all
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.0'
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: uncache venv
+        uses: actions/cache@v3
+        with:
+          path: ./venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Run fetch air quality data script
+        run: |
+          poetry run python src/data/process_data.py
+
+  validate-data:
+    needs: process-data
+    runs-on: ubuntu-20.04
+    #    env:
+    #      AIR_QUALITY_API_URL: ${{ secrets.AIR_QUALITY_API_URL }} # TODO: Add secret
+    permissions: write-all
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.0'
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: uncache venv
+        uses: actions/cache@v3
+        with:
+          path: ./venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Run fetch air quality data script
+        run: |
+          poetry run python src/data/validate_data.py
+
+  test-data:
+    needs: process-data
+    runs-on: ubuntu-20.04
+    #    env:
+    #      AIR_QUALITY_API_URL: ${{ secrets.AIR_QUALITY_API_URL }} # TODO: Add secret
+    permissions: write-all
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.0'
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: uncache venv
+        uses: actions/cache@v3
+        with:
+          path: ./venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Run fetch air quality data script
+        run: |
+          poetry run python src/data/test_data.py
+
+  ks-test-data:
+    needs: process-data
+    runs-on: ubuntu-20.04
+    #    env:
+    #      AIR_QUALITY_API_URL: ${{ secrets.AIR_QUALITY_API_URL }} # TODO: Add secret
+    permissions: write-all
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.0'
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: uncache venv
+        uses: actions/cache@v3
+        with:
+          path: ./venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Run fetch air quality data script
+        run: |
+          poetry run python src/data/ks_test_data.py
+
+  train-test-split-data:
+    needs:
+        - process-data
+        - test-data
+        - ks-test-data
+    runs-on: ubuntu-20.04
+    #    env:
+    #      AIR_QUALITY_API_URL: ${{ secrets.AIR_QUALITY_API_URL }} # TODO: Add secret
+    permissions: write-all
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.0'
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: uncache venv
+        uses: actions/cache@v3
+        with:
+          path: ./venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Run fetch air quality data script
+        run: |
+          poetry run python src/data/train_test_split_data.py
