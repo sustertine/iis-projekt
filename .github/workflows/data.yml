@@ -32,7 +32,7 @@ jobs:
           poetry config virtualenvs.in-project true
           poetry env use python3.10
           poetry install
-      - name: Run fetch air quality data script
+      - name: Run script
         run: |
           poetry run python src/data/fetch_air_quality_data.py
       - name: Cache .venv directory
@@ -40,6 +40,7 @@ jobs:
         with:
           path: ./.venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
   fetch-weather-data:
     needs: fetch-air-quality-data
     runs-on: ubuntu-20.04
@@ -66,9 +67,10 @@ jobs:
           path: ./venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Run fetch air quality data script
+      - name: Run script
         run: |
           poetry run python src/data/fetch_weather_data.py
+
 
   process-data:
     needs: fetch-weather-data
@@ -96,9 +98,10 @@ jobs:
           path: ./venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Run fetch air quality data script
+      - name: Run script
         run: |
           poetry run python src/data/process_data.py
+
 
   validate-data:
     needs: process-data
@@ -126,9 +129,10 @@ jobs:
           path: ./venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Run fetch air quality data script
+      - name: Run script
         run: |
           poetry run python src/data/validate_data.py
+
 
   test-data:
     needs: process-data
@@ -156,9 +160,10 @@ jobs:
           path: ./venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Run fetch air quality data script
+      - name: Run script
         run: |
           poetry run python src/data/test_data.py
+
 
   ks-test-data:
     needs: process-data
@@ -186,15 +191,16 @@ jobs:
           path: ./venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Run fetch air quality data script
+      - name: Run script
         run: |
           poetry run python src/data/ks_test_data.py
 
+
   train-test-split-data:
     needs:
-        - validate-data
-        - test-data
-        - ks-test-data
+      - validate-data
+      - test-data
+      - ks-test-data
     runs-on: ubuntu-20.04
     #    env:
     #      AIR_QUALITY_API_URL: ${{ secrets.AIR_QUALITY_API_URL }} # TODO: Add secret
@@ -219,6 +225,6 @@ jobs:
           path: ./venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Run fetch air quality data script
+      - name: Run script
         run: |
           poetry run python src/data/train_test_split_data.py
