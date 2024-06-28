@@ -1,5 +1,4 @@
-name: Data Pipeline
-description: Fetch Air-Quality, Fetch weather, process, [validate, test, ks-test], split
+name: Data Pipeline, fetch, process, test, split
 
 on:
 #  schedule:
