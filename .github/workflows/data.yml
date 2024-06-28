@@ -192,7 +192,7 @@ jobs:
 
   train-test-split-data:
     needs:
-        - process-data
+        - validate-data
         - test-data
         - ks-test-data
     runs-on: ubuntu-20.04
