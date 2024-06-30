@@ -49,7 +49,7 @@ jobs:
           poetry run dvc push -r origin
       - name: Commit changes to DVC
         run: |
-          poetry run dvc add data/raw/mbajk/
+          poetry run dvc add data/raw/air-quality/
           poetry run dvc push -r origin
       - name: Commit and push changes
         run: |
