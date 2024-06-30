@@ -72,6 +72,7 @@ jobs:
           poetry run python src/data/fetch_weather_data.py
 
 
+
   process-data:
     needs: fetch-weather-data
     runs-on: ubuntu-20.04
