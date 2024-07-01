@@ -123,7 +123,7 @@ jobs:
 
 
   process-data:
-    needs: fetch-air-quality-data
+    needs: fetch-weather-data
     runs-on: ubuntu-20.04
     env:
       WEATHER_URL: ${{ secrets.WEATHER_URL }}
