@@ -57,6 +57,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add .
+          git commit -m "Commit changes before pull"
           git pull
           git diff-index --quiet HEAD || (git commit -a -m "Update data - air quality" --allow-empty)
           git push
@@ -112,6 +113,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add .
+          git commit -m "Commit changes before pull"
           git pull
           git diff-index --quiet HEAD || (git commit -a -m "Update data - weather" --allow-empty)
           git push
