@@ -63,6 +63,8 @@ jobs:
         with:
           path: ./.venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+      - name: Print .venv contents
+        run: ls -la ./.venv
 
   fetch-weather-data:
     needs: fetch-air-quality-data
@@ -89,7 +91,8 @@ jobs:
         with:
           path: ./venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-
+      - name: Print .venv contents
+        run: ls -la ./.venv
       - name: Configure DVC
         run: |
           poetry run dvc remote modify origin --local access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
