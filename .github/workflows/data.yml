@@ -58,13 +58,15 @@ jobs:
           poetry run dvc push -r origin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Print working directory contents before cache
+        run: ls -la
       - name: Cache .venv directory
         uses: actions/cache@v3
         with:
           path: ./.venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-      - name: Print .venv contents
-        run: ls -la ./.venv
+      - name: Print working directory contents after cache
+        run: ls -la
 
   fetch-weather-data:
     needs: fetch-air-quality-data
