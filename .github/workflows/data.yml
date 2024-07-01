@@ -163,7 +163,7 @@ jobs:
           poetry run python src/data/process_data.py
       - name: Commit changes to DVC
         run: |
-          poetry run dvc add data/raw/processed/ 
+          poetry run dvc add data/processed/ 
           poetry run dvc push -r origin
       - name: Commit and push changes
         run: |
