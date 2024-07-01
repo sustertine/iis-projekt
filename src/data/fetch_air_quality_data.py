@@ -1,11 +1,10 @@
 import os
-import sys
 
 import pandas as pd
 import requests
 
 from src.util.constants import AIR_QUALITY_URL, DATA_RAW_DIR
-from src.util.util import get_all_coordinates
+from src.util.util import get_cities_and_coordinates
 
 
 def fetch_air_quality_data(lat, lon):
@@ -28,7 +27,7 @@ def save_write_to_csv(data, city):
 
 
 def main():
-    coordinates = get_all_coordinates()
+    coordinates = get_cities_and_coordinates()
     for item in coordinates.items():
         city, lat_lon = item
         lat = lat_lon['lat']
