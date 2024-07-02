@@ -185,7 +185,7 @@ jobs:
 
 
   validate-data:
-    needs: fetch-weather-data
+    needs: process-data
     runs-on: ubuntu-20.04
     env:
       WEATHER_URL: ${{ secrets.WEATHER_URL }}
