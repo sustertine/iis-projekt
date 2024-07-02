@@ -2,7 +2,7 @@ name: Data Pipeline, fetch, process, test, split
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0,12 * * *'
   push:
     branches:
       - develop
