@@ -10,7 +10,7 @@ from evidently.tests import TestNumberOfColumnsWithMissingValues, TestNumberOfRo
 
 from evidently.test_preset import DataStabilityTestPreset, NoTargetPerformanceTestPreset
 
-from src.util.constants import DATA_PROCESSED_DIR, DATA_REFERENCE_DIR, DATA_REPORTS_DIR
+from src.util.constants import DATA_PROCESSED_DIR, DATA_REFERENCE_DIR, REPORTS_DIR
 
 
 def data_drift_test():
@@ -22,7 +22,7 @@ def data_drift_test():
         reference = pd.read_csv(f'{DATA_REFERENCE_DIR}/{file}')
 
         report.run(reference_data=reference, current_data=current)
-        report.save_html(f'{DATA_REPORTS_DIR}/data-drift/{filename}.html')
+        report.save_html(f'{REPORTS_DIR}/data-drift/{filename}.html')
 
 
 def stability_test():
@@ -44,7 +44,7 @@ def stability_test():
         reference = pd.read_csv(f'{DATA_REFERENCE_DIR}/{file}')
 
         suite.run(reference_data=reference, current_data=current)
-        suite.save_html(f'{DATA_REPORTS_DIR}/data-stability/{filename}.html')
+        suite.save_html(f'{REPORTS_DIR}/data-stability/{filename}.html')
 
 
 def main():

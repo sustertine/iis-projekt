@@ -1,5 +1,17 @@
+import os
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+from src.util.constants import DATA_PROCESSED_DIR, DATA_TRAIN_DIR, DATA_TEST_DIR
+
+
 def main():
-    print('Splitting data...')
+    for file in os.listdir(f'{DATA_PROCESSED_DIR}'):
+        df = pd.read_csv(f'{DATA_PROCESSED_DIR}/{file}')
+        train, test = train_test_split(df, test_size=0.2)
+        train.to_csv(f'{DATA_TRAIN_DIR}/{file}', index=False)
+        test.to_csv(f'{DATA_TEST_DIR}/{file}', index=False)
 
 
 if __name__ == '__main__':
