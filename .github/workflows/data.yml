@@ -256,10 +256,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
 
-      - name: uncache venv
-        uses: actions/cache@v3
+      - name: Cache .venv directory
+        uses: actions/cache@v4
         with:
-          path: ./venv
+          path: .venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
 
       - name: Run script
