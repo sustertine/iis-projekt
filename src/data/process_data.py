@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from src.util.constants import DATA_RAW_DIR, DATA_PROCESSED_DIR
+from src.util.constants import DATA_RAW_DIR, DATA_PROCESSED_DIR, DATA_REFERENCE_DIR
 
 
 def remove_duplicates():
@@ -17,6 +17,18 @@ def remove_duplicates():
         df = pd.read_csv(file_path)
         df.drop_duplicates(inplace=True)
         df.to_csv(file_path, index=False)
+
+
+def create_reference_copies():
+    for file in os.listdir(DATA_PROCESSED_DIR):
+        file_path = f'{DATA_PROCESSED_DIR}/{file}'
+        df = pd.read_csv(file_path)
+        reference_file_path = f'{DATA_REFERENCE_DIR}/{file}'
+
+        if os.path.exists(reference_file_path):
+            os.remove(reference_file_path)
+
+        df.to_csv(reference_file_path, index=False)
 
 
 def join_weather_data():
@@ -37,6 +49,7 @@ def join_weather_data():
 
 def main():
     remove_duplicates()
+    create_reference_copies()
     join_weather_data()
 
 
