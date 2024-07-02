@@ -223,24 +223,13 @@ jobs:
 
       - name: Run script
         run: |
-          poetry run python src/data/test_data.py
-
-      - name: Commit and push changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git diff-index --quiet HEAD || (git commit -a -m "Test data - generate reports" --allow-empty)
-          git push
-          poetry run dvc push -r origin
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
+          poetry run python src/data/validate_data.py
 
   test-data:
     needs: process-data
     runs-on: ubuntu-20.04
+    env:
+      WEATHER_URL: ${{ secrets.WEATHER_URL }}
     permissions: write-all
 
     steps:
@@ -250,23 +239,42 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10.0'
-
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
       - name: Install poetry
         run: |
           python -m pip install --upgrade pip
           pip install poetry
-
       - name: Cache .venv directory
         uses: actions/cache@v4
         with:
           path: .venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+      - name: Configure DVC
+        run: |
+          poetry run dvc remote modify origin --local access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          poetry run dvc remote modify origin --local secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Git pull
+        run: |
+          git fetch origin
+          git pull
+      - name: Dvc pull
+        run: |
+          poetry run dvc pull -r origin
 
       - name: Run script
         run: |
           poetry run python src/data/test_data.py
-
-
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git diff-index --quiet HEAD || (git commit -a -m "Update data - weather" --allow-empty)
+          git push
+          poetry run dvc push -r origin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   ks-test-data:
     needs: process-data
