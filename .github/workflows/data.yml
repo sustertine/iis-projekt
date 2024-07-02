@@ -210,7 +210,6 @@ jobs:
         with:
           path: .venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-
       - name: Configure DVC
         run: |
           poetry run dvc remote modify origin --local access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -222,7 +221,9 @@ jobs:
       - name: Dvc pull
         run: |
           poetry run dvc pull -r origin
-
+      - name: Print data/processed
+        run: |
+          ls data/processed
       - name: Run script
         run: |
           poetry run python src/data/validate_data.py
