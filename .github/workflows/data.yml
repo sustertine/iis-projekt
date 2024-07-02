@@ -10,6 +10,7 @@ on:
 jobs:
   fetch-air-quality-data:
     runs-on: ubuntu-20.04
+    if: false
     env:
       AIR_QUALITY_URL: ${{ secrets.AIR_QUALITY_URL }}
     permissions: write-all
@@ -182,7 +183,7 @@ jobs:
 
 
   validate-data:
-    needs: process-data
+#    needs: process-data
     runs-on: ubuntu-20.04
     permissions: write-all
 
