@@ -49,7 +49,8 @@ def join_weather_data():
 
 def resample_data():
     for file in os.listdir(DATA_PROCESSED_DIR):
-        df = pd.read_csv(f'{DATA_PROCESSED_DIR}/{file}', index_col='time', parse_dates=True)
+        df = pd.read_csv(f'{DATA_PROCESSED_DIR}/{file}', index_col=0, parse_dates=True)
+        df.sort_index(inplace=True)
         df = df.resample('H').mean()
         df.fillna(method='ffill', inplace=True)
         df.to_csv(f'{DATA_PROCESSED_DIR}/{file}', index=True)
