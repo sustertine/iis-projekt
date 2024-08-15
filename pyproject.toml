@@ -6,7 +6,7 @@ authors = ["Tine Šuster <tine.suster@gmai>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "3.10"
 python-dotenv = "^1.0.1"
 requests = "^2.32.3"
 pandas = "^2.2.2"
@@ -18,7 +18,8 @@ evidently = "^0.4.30"
 matplotlib = "^3.9.1.post1"
 scikit-learn = "^1.5.1"
 fastapi = {extras = ["standard"], version = "^0.112.0"}
-
+tensorflow-io-gcs-filesystem = "0.27.0"
+tensorflow = "~2.10"
 
 [build-system]
 requires = ["poetry-core"]

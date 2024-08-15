@@ -1,7 +1,6 @@
 import os
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
 from src.util.constants import DATA_PROCESSED_DIR, DATA_TRAIN_DIR, DATA_TEST_DIR
 
