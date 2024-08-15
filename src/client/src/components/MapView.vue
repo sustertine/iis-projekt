@@ -1,11 +1,53 @@
 <script setup lang="ts">
+import {onMounted, Ref, ref} from "vue";
+import ComboBox from "@/components/ComboBox.vue";
+import {Location} from "@/models";
+import L from 'leaflet';
+
+const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
+const GET_PREDICTION_URL = import.meta.env.VITE_SERVER_URL + '/predict-aqi';
+
+const locations: Ref<Array<Location>> = ref([]);
+const map = ref();
+const mapContainer = ref();
+
+onMounted(() => {
+  map.value = L.map(mapContainer.value).setView([46.1204, 14.8156], 9);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map.value);
+
+  fetch(GET_LOCATIONS_URL)
+      .then(response => response.json())
+      .then(data => {
+        locations.value = data;
+
+        locations.value.forEach(location => {
+          L.marker([location.lat, location.lon]).addTo(map.value);
+        });
+      });
+
+});
+
+const onLocationSelected = (selectedLocation: Location) => {
+  map.value.setView([selectedLocation.lat, selectedLocation.lon], 13);
+  fetch(GET_PREDICTION_URL + '/' + selectedLocation.name)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+      });
+}
 
 </script>
 
 <template>
-<h1>Map view</h1>
+  <div class="flex space-x-3">
+    <ComboBox :locations="locations" v-on:location-selected="onLocationSelected"/>
+    <div ref="mapContainer" style="width: 100%; height: 45rem"></div>
+  </div>
 </template>
 
 <style scoped>
-
 </style>

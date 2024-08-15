@@ -47,10 +47,19 @@ def join_weather_data():
         df.to_csv(f'{DATA_PROCESSED_DIR}/{city}.csv', index=False)
 
 
+def resample_data():
+    for file in os.listdir(DATA_PROCESSED_DIR):
+        df = pd.read_csv(f'{DATA_PROCESSED_DIR}/{file}')
+        df = df.resample('H').mean()
+        df.fillna(method='ffill', inplace=True)
+        df.to_csv(f'{DATA_PROCESSED_DIR}/{file}', index=True)
+
+
 def main():
     remove_duplicates()
     create_reference_copies()
     join_weather_data()
+    resample_data()
 
 
 if __name__ == '__main__':

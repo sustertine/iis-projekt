@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import NavMenu from "@/components/NavMenu.vue";
+import { Separator } from '@/components/ui/separator'
 </script>
 
 <template>
-  <div class="flex h-screen">
-    <main class="flex-1 p-4">
-      <div class="flex justify-center border-2 mb-2 rounded-md border-blue-500 p-2">
-        <NavMenu />
+  <div class="flex h-screen py-1 px-16">
+    <main class="flex-grow p-4">
+      <div class="flex justify-center mb-2 p-2">
+        <NavMenu/>
       </div>
-      <div class="flex-1 border-2 rounded-md border-blue-500 p-2">
-        <router-view />
+      <Separator label="AQ Monitor" />
+      <div class="flex-grow w-full py-4">
+        <router-view/>
       </div>
     </main>
   </div>
