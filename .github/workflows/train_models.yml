@@ -52,6 +52,8 @@ jobs:
         run: |
           poetry run python src/models/train_eval_models.py
         env:
+          MLFLOW_REPO_OWNER: ${{ secrets.MLFLOW_REPO_OWNER }}
+          MLFLOW_REPO_NAME: ${{ secrets.MLFLOW_REPO_NAME }}
       - name: Commit changes to DVC
         run: |
           poetry run dvc add data/raw/air-quality/
