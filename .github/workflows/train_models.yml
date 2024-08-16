@@ -54,6 +54,8 @@ jobs:
         env:
           MLFLOW_REPO_OWNER: ${{ secrets.MLFLOW_REPO_OWNER }}
           MLFLOW_REPO_NAME: ${{ secrets.MLFLOW_REPO_NAME }}
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
       - name: Commit changes to DVC
         run: |
           poetry run dvc add data/raw/air-quality/
