@@ -10,6 +10,7 @@ from keras.layers import LSTM, Dense
 
 import numpy as np
 import pandas as pd
+from mlflow.environment_variables import MLFLOW_TRACKING_URI
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
@@ -25,6 +26,8 @@ import mlflow
 dagshub.init(repo_owner=MLFLOW_REPO_OWNER,
              repo_name=MLFLOW_REPO_NAME,
              mlflow=True)
+
+mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI'))
 
 logging.basicConfig(
     level=logging.INFO,
