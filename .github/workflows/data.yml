@@ -1,4 +1,4 @@
-name: Data Pipeline, fetch, process, test, split
+name: Data Pipeline
 
 on:
   schedule:
