@@ -4,6 +4,7 @@ import ComboBox from "@/components/ComboBox.vue";
 import {Location} from "@/models";
 import L from 'leaflet';
 import AQIPredictionCard from "@/components/AQIPredictionCard.vue";
+import {Card, CardContent} from "@/components/ui/card";
 
 const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
 const GET_PREDICTION_URL = import.meta.env.VITE_SERVER_URL + '/predict-aqi';
@@ -43,19 +44,15 @@ const onLocationSelected = (selectedLocation: Location) => {
         predictions.value = data;
       });
 }
-
 </script>
 
 <template>
   <div class="flex space-x-3">
-    <!-- Flex column -->
     <div class="flex flex-col space-y-3">
       <ComboBox :locations="locations" @location-selected="onLocationSelected"/>
-      <div class="flex ">
-        <AQIPredictionCard :location="currentLocation" :predictions="predictions" v-if="predictions && currentLocation"/>
-      </div>
+      <AQIPredictionCard :location="currentLocation" :predictions="predictions" v-if="predictions && currentLocation"/>
     </div>
-    <div ref="mapContainer" style="width: 100%; height: 45rem"></div>
+      <div ref="mapContainer" style="width: 100%; height: 45rem"></div>
   </div>
 </template>
 

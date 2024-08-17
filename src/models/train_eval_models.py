@@ -39,7 +39,6 @@ def create_model(n_time_steps, n_features):
     model.add(Dense(24))
     model.compile(loss='mse', optimizer='adam')
 
-
     return model
 
 
@@ -144,7 +143,6 @@ def process_city(city):
 
 def main():
     start_time = time.time()
-
     cities = list(get_cities())
 
     for city in cities:
@@ -152,7 +150,7 @@ def main():
 
     end_time = time.time()
     execution_time = end_time - start_time
-    logging.info(f'Models trained in: {execution_time/60}min {execution_time%60:.2f}s')
+    logging.info(f'Models trained in: {execution_time / 60}min {execution_time % 60:.2f}s')
 
 
 if __name__ == '__main__':

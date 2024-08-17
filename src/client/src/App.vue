@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import NavMenu from "@/components/NavMenu.vue";
 import { Separator } from '@/components/ui/separator'
+import ThemeSwitch from "@/components/ThemeSwitch.vue";
 </script>
 
 <template>

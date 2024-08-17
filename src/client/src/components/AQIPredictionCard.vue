@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // define props location, and predictions
-import {ref, defineProps} from 'vue'
+import {defineProps} from 'vue'
 import {BarChart} from "@/components/ui/chart-bar";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 
 const props = defineProps<{
   location: string;
@@ -9,34 +10,52 @@ const props = defineProps<{
 }>();
 
 const xFormatter = (tick: string, i: number) => {
-  const result = new Intl.DateTimeFormat('en-US').format(new Date(tick));
-  console.log('xFormatter', result);
-  return result;
+  return new Intl.DateTimeFormat('de-DE').format(new Date(tick));
 }
 
 const yFormatter = (tick: number, i: number) => {
-  const result = new Intl.NumberFormat('de-DE').format(tick);
-  console.log('yFormatter', result);
-  return result;
+  return new Intl.NumberFormat('de-DE').format(tick);
+}
+
+const getTodaysDate = () => {
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+  const yyyy = today.getFullYear();
+
+  return dd + '.' + mm + '.' + yyyy;
 }
 </script>
 
 <template>
-  <BarChart
-      :data="props.predictions"
-      index="time"
-      :categories="['aqi']"
-      :y-formatter="yFormatter"
-      :x-formatter="xFormatter"
-      :type="'stacked'"
-      :show-x-axis="true"
-      :show-y-axis="true"
-      :show-legend="true"
-      :show-grid="true"
-      :show-tooltip="true"
-      :title="'AQI Prediction for ' + props.location"
-      :colors="['#3182CE']"
-  />
+  <Card>
+    <CardHeader>
+      <CardTitle>
+        {{ props.location }} - {{ getTodaysDate() }}
+      </CardTitle>
+      <CardDescription>
+        European AQI Prediction for the next 24 hours
+      </CardDescription>
+    </CardHeader>
+    <CardContent>
+      <BarChart
+          :data="props.predictions"
+          index="time"
+          :categories="['aqi']"
+          :type="'stacked'"
+          :y-formatter="yFormatter"
+          :x-formatter="xFormatter"
+          :show-x-axis="true"
+          :show-y-axis="true"
+          :show-legend="true"
+          :show-grid="true"
+          :show-tooltip="true"
+          :title="'AQI Prediction for ' + props.location"
+          :colors="['#3182CE']"
+      />
+    </CardContent>
+  </Card>
+
 </template>
 
 <style scoped>
