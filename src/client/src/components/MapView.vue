@@ -3,6 +3,7 @@ import {onMounted, Ref, ref} from "vue";
 import ComboBox from "@/components/ComboBox.vue";
 import {Location} from "@/models";
 import L from 'leaflet';
+import AQIPredictionCard from "@/components/AQIPredictionCard.vue";
 
 const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
 const GET_PREDICTION_URL = import.meta.env.VITE_SERVER_URL + '/predict-aqi';
@@ -10,6 +11,8 @@ const GET_PREDICTION_URL = import.meta.env.VITE_SERVER_URL + '/predict-aqi';
 const locations: Ref<Array<Location>> = ref([]);
 const map = ref();
 const mapContainer = ref();
+const currentLocation = ref<string | null>(null);
+const predictions = ref<Array<{ time: string, aqi: number }> | null>(null);
 
 onMounted(() => {
   map.value = L.map(mapContainer.value).setView([46.1204, 14.8156], 9);
@@ -32,11 +35,12 @@ onMounted(() => {
 });
 
 const onLocationSelected = (selectedLocation: Location) => {
+  currentLocation.value = selectedLocation.name;
   map.value.setView([selectedLocation.lat, selectedLocation.lon], 13);
   fetch(GET_PREDICTION_URL + '/' + selectedLocation.name)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        predictions.value = data;
       });
 }
 
@@ -44,7 +48,13 @@ const onLocationSelected = (selectedLocation: Location) => {
 
 <template>
   <div class="flex space-x-3">
-    <ComboBox :locations="locations" v-on:location-selected="onLocationSelected"/>
+    <!-- Flex column -->
+    <div class="flex flex-col space-y-3">
+      <ComboBox :locations="locations" @location-selected="onLocationSelected"/>
+      <div class="flex ">
+        <AQIPredictionCard :location="currentLocation" :predictions="predictions" v-if="predictions && currentLocation"/>
+      </div>
+    </div>
     <div ref="mapContainer" style="width: 100%; height: 45rem"></div>
   </div>
 </template>

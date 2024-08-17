@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.serve.location_info_service import get_locations_info
+from src.serve.aqi_predictor import AQIPredictor
 
 app = FastAPI()
 
@@ -18,6 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+predictor = AQIPredictor()
 
 @app.get("/", include_in_schema=False)
 def read_root():
@@ -31,4 +33,4 @@ def get_locations():
 
 @app.get("/api/predict-aqi/{location_name}")
 def predict_aqi(location_name: str):
-    return {"location_name": location_name, "aqi": 42.0}
+    return predictor.predict(location_name)

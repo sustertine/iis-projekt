@@ -146,12 +146,10 @@ def main():
     start_time = time.time()
 
     cities = list(get_cities())
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        executor.map(process_city, cities)
 
-    # for city in cities:
-    #     process_city(city)
-    #     break
+    for city in cities:
+        process_city(city)
+        break
 
     end_time = time.time()
     execution_time = end_time - start_time
