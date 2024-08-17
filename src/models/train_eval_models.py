@@ -1,7 +1,6 @@
 import logging
 import os
 
-import tensorflow as tf
 import pickle as pkl
 import json
 
@@ -10,7 +9,6 @@ from keras.layers import LSTM, Dense
 
 import numpy as np
 import pandas as pd
-from mlflow.environment_variables import MLFLOW_TRACKING_URI
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
@@ -21,16 +19,11 @@ from src.models.feature_engineer import FeatureEngineer
 from src.util.constants import RESOURCES_DIR, DATA_PROCESSED_DIR, MODELS_DIR, MLFLOW_REPO_OWNER, MLFLOW_REPO_NAME, \
     MLFLOW_TRACKING_USERNAME, MLFLOW_TRACKING_PASSWORD
 
-import dagshub
 import mlflow
 
 mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI'))
 os.environ['MLFLOW_TRACKING_USERNAME'] = MLFLOW_TRACKING_USERNAME
 os.environ['MLFLOW_TRACKING_PASSWORD'] = MLFLOW_TRACKING_PASSWORD
-
-dagshub.init(repo_owner=MLFLOW_REPO_OWNER,
-             repo_name=MLFLOW_REPO_NAME,
-             mlflow=True)
 
 logging.basicConfig(
     level=logging.INFO,
