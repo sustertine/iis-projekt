@@ -9,13 +9,13 @@ const props = defineProps<{
 }>();
 
 const xFormatter = (tick: string, i: number) => {
-  const result = new Intl.DateTimeFormat('en-US').format(new Date(tick)).toString();
+  const result = new Intl.DateTimeFormat('en-US').format(new Date(tick));
   console.log('xFormatter', result);
   return result;
 }
 
 const yFormatter = (tick: number, i: number) => {
-  const result = new Intl.NumberFormat('de-DE').format(tick).toString();
+  const result = new Intl.NumberFormat('de-DE').format(tick);
   console.log('yFormatter', result);
   return result;
 }

@@ -149,7 +149,6 @@ def main():
 
     for city in cities:
         process_city(city)
-        break
 
     end_time = time.time()
     execution_time = end_time - start_time
