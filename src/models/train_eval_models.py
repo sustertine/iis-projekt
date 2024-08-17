@@ -18,7 +18,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 
 from src.models.feature_engineer import FeatureEngineer
-from src.util.constants import RESOURCES_DIR, DATA_PROCESSED_DIR, MODELS_DIR, MLFLOW_REPO_OWNER, MLFLOW_REPO_NAME
+from src.util.constants import RESOURCES_DIR, DATA_PROCESSED_DIR, MODELS_DIR, MLFLOW_REPO_OWNER, MLFLOW_REPO_NAME, \
+    MLFLOW_TRACKING_USERNAME, MLFLOW_TRACKING_PASSWORD
 
 import dagshub
 import mlflow
@@ -28,7 +29,8 @@ dagshub.init(repo_owner=MLFLOW_REPO_OWNER,
              mlflow=True)
 
 mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI'))
-
+os.environ['MLFLOW_TRACKING_USERNAME'] = MLFLOW_TRACKING_USERNAME
+os.environ['MLFLOW_TRACKING_PASSWORD'] = MLFLOW_TRACKING_PASSWORD
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - [%(threadName)s/%(lineno)s] - %(levelname)s - %(message)s'
