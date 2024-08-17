@@ -1,8 +1,10 @@
+import concurrent
 import logging
 import os
 
 import pickle as pkl
 import json
+import time
 
 from keras import Sequential
 from keras.layers import LSTM, Dense
@@ -16,7 +18,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 
 from src.models.feature_engineer import FeatureEngineer
-from src.util.constants import RESOURCES_DIR, DATA_PROCESSED_DIR, MODELS_DIR, MLFLOW_REPO_OWNER, MLFLOW_REPO_NAME, \
+from src.util.constants import RESOURCES_DIR, DATA_PROCESSED_DIR, MODELS_DIR, \
     MLFLOW_TRACKING_USERNAME, MLFLOW_TRACKING_PASSWORD
 
 import mlflow
@@ -33,9 +35,11 @@ logging.basicConfig(
 
 def create_model(n_time_steps, n_features):
     model = Sequential()
-    model.add(LSTM(50, input_shape=(n_time_steps, n_features)))  # train_X.shape[1], train_X.shape[2
+    model.add(LSTM(50, input_shape=(n_time_steps, n_features)))  # train_X.shape[1], train_X.shape[2]
     model.add(Dense(24))
     model.compile(loss='mse', optimizer='adam')
+
+
     return model
 
 
@@ -110,6 +114,11 @@ def train_eval_model(city, epochs):
     model = create_model(X_train.shape[1], X_train.shape[2])
     model.fit(X_train, y_train, epochs=epochs, batch_size=32, validation_data=(X_test, y_test), verbose=2)
 
+    y_pred = model.predict(X_test)
+    mlflow.log_metric('mae', np.mean(np.abs(y_test - y_pred)))
+    mlflow.log_metric('mse', np.mean((y_test - y_pred) ** 2))
+    mlflow.log_metric('rmse', np.sqrt(np.mean((y_test - y_pred) ** 2)))
+
 
 def train_model(city, epochs):
     logging.info(f'Training model for city: {city}')
@@ -125,13 +134,28 @@ def train_model(city, epochs):
     mlflow.register_model(f'runs:/{mlflow.active_run().info.run_id}/{city}/model', f'{city}_model')
 
 
+def process_city(city):
+    mlflow.set_experiment('Train models')
+    with mlflow.start_run(run_name=city):
+        mlflow.tensorflow.autolog()
+        train_eval_model(city, epochs=3)
+        train_model(city, epochs=3)
+
+
 def main():
-    for city in get_cities():
-        mlflow.set_experiment('Train models')
-        with mlflow.start_run(run_name=city):
-            mlflow.tensorflow.autolog()
-            train_eval_model(city, epochs=3)
-            train_model(city, epochs=3)
+    start_time = time.time()
+
+    cities = list(get_cities())
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        executor.map(process_city, cities)
+
+    # for city in cities:
+    #     process_city(city)
+    #     break
+
+    end_time = time.time()
+    execution_time = end_time - start_time
+    logging.info(f'Models trained in: {execution_time/60}min {execution_time%60:.2f}s')
 
 
 if __name__ == '__main__':
