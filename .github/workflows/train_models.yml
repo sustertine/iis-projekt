@@ -52,10 +52,13 @@ jobs:
         run: |
           poetry run python src/models/train_eval_models.py
         env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           MLFLOW_REPO_OWNER: ${{ secrets.MLFLOW_REPO_OWNER }}
           MLFLOW_REPO_NAME: ${{ secrets.MLFLOW_REPO_NAME }}
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
-          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
       - name: Commit changes to DVC
         run: |
           poetry run dvc add data/raw/air-quality/

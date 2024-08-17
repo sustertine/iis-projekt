@@ -31,6 +31,7 @@ dagshub.init(repo_owner=MLFLOW_REPO_OWNER,
 mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI'))
 os.environ['MLFLOW_TRACKING_USERNAME'] = MLFLOW_TRACKING_USERNAME
 os.environ['MLFLOW_TRACKING_PASSWORD'] = MLFLOW_TRACKING_PASSWORD
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - [%(threadName)s/%(lineno)s] - %(levelname)s - %(message)s'
