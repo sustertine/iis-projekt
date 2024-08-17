@@ -24,13 +24,13 @@ from src.util.constants import RESOURCES_DIR, DATA_PROCESSED_DIR, MODELS_DIR, ML
 import dagshub
 import mlflow
 
-dagshub.init(repo_owner=MLFLOW_REPO_OWNER,
-             repo_name=MLFLOW_REPO_NAME,
-             mlflow=True)
-
 mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI'))
 os.environ['MLFLOW_TRACKING_USERNAME'] = MLFLOW_TRACKING_USERNAME
 os.environ['MLFLOW_TRACKING_PASSWORD'] = MLFLOW_TRACKING_PASSWORD
+
+dagshub.init(repo_owner=MLFLOW_REPO_OWNER,
+             repo_name=MLFLOW_REPO_NAME,
+             mlflow=True)
 
 logging.basicConfig(
     level=logging.INFO,
