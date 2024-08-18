@@ -111,37 +111,36 @@ class AQIPredictor:
 
         logging.info(f"COMPLETED loading all model components in: {datetime.now() - start_time}s")
 
+    def predict(self, location_name: str):
+        if f'{location_name}_model' not in self.model_map:
+            raise HTTPException(status_code=404, detail=f"Model for location {location_name} not found")
+        current_date_time = datetime.now()
+        data = get_current_data(location_name)
 
-def predict(self, location_name: str):
-    if f'{location_name}_model' not in self.model_map:
-        raise HTTPException(status_code=404, detail=f"Model for location {location_name} not found")
-    current_date_time = datetime.now()
-    data = get_current_data(location_name)
+        data_dict = data.to_dict(orient='records')[0]
+        data_dict['location_name'] = location_name
+        data_dict['time'] = current_date_time.isoformat()
 
-    data_dict = data.to_dict(orient='records')[0]
-    data_dict['location_name'] = location_name
-    data_dict['time'] = current_date_time.isoformat()
+        current_aqi = self.model_map[f'{location_name}_target_scaler'].transform(
+            data['european_aqi'].values.reshape(-1, 1))
+        data = self.model_map[f'{location_name}_pipeline'].transform(data)
+        data['european_aqi'] = current_aqi
+        data.dropna(inplace=True)
 
-    current_aqi = self.model_map[f'{location_name}_target_scaler'].transform(
-        data['european_aqi'].values.reshape(-1, 1))
-    data = self.model_map[f'{location_name}_pipeline'].transform(data)
-    data['european_aqi'] = current_aqi
-    data.dropna(inplace=True)
+        data = np.expand_dims(data.values, axis=0)
+        prediction = self.model_map[f'{location_name}_model'].predict(data)
+        prediction = self.model_map[f'{location_name}_target_scaler'].inverse_transform(prediction)
 
-    data = np.expand_dims(data.values, axis=0)
-    prediction = self.model_map[f'{location_name}_model'].predict(data)
-    prediction = self.model_map[f'{location_name}_target_scaler'].inverse_transform(prediction)
+        prediction = prediction.flatten().tolist()
+        predictions_list = []
+        for i in range(len(prediction)):
+            future_time = current_date_time + timedelta(hours=i + 1)
+            predictions_list.append({
+                'time': future_time.strftime('%d-%m-%Y %H:%M:%S'),
+                'aqi': prediction[i]
+            })
 
-    prediction = prediction.flatten().tolist()
-    predictions_list = []
-    for i in range(len(prediction)):
-        future_time = current_date_time + timedelta(hours=i + 1)
-        predictions_list.append({
-            'time': future_time.strftime('%d-%m-%Y %H:%M:%S'),
-            'aqi': prediction[i]
-        })
+        data_dict['predictions'] = predictions_list
+        api_calls_client.create_api_call(data_dict)
 
-    data_dict['predictions'] = predictions_list
-    api_calls_client.create_api_call(data_dict)
-
-    return predictions_list
+        return predictions_list

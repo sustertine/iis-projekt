@@ -43,8 +43,6 @@ const getTodaysDate = () => {
           index="time"
           :categories="['aqi']"
           :type="'stacked'"
-          :y-formatter="yFormatter"
-          :x-formatter="xFormatter"
           :show-x-axis="true"
           :show-y-axis="true"
           :show-legend="true"
