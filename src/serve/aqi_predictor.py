@@ -60,7 +60,6 @@ class AQIPredictor:
         with open('resources/cities.json') as f:
             cities = dict(json.load(f))
             for city in cities:
-                break
                 model_name = f"{city}_model"
                 pipeline_name = f"{city}_pipeline"
                 target_scaler_name = f"{city}_target_scaler"
