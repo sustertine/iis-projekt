@@ -81,9 +81,7 @@ const parseParams = () => {
 }
 
 const reduceAndSortPredictions = () => {
-  const allPredictions = latestPredictions.value.flatMap(data => data.predictions);
-  allPredictions.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
-  console.log(allPredictions)
+  const allPredictions = latestPredictions.value.flatMap((data: Record<string, any>) => data.evaluated_predictions);
   return allPredictions;
 }
 </script>
@@ -142,7 +140,11 @@ const reduceAndSortPredictions = () => {
       <h1>
         AQI Predictions
       </h1>
-      <AreaChart v-if="latestPredictions" :data="reduceAndSortPredictions()" index="time" :categories="['aqi']" :colors="['#3182CE']"/>
+      <AreaChart v-if="latestPredictions"
+                 :data="reduceAndSortPredictions()"
+                 index="time"
+                 :categories="['aqi', 'actual_aqi', 'mae', 'mse', 'rmse']"
+                 :colors="['#3182CE', '#00ff20', '#f3ff7e', '#f33c3c', '#FFA500']"/>
     </div>
     <div v-else class="mb-7">
       <h2 class="font-bold">
