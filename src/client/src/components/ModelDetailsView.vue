@@ -4,8 +4,9 @@ import {onMounted, ref, Ref} from "vue";
 import {Location, ModelMetadata} from "@/models";
 import ComboBox from "@/components/ComboBox.vue";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Separator} from "@/components/ui/separator";
+import {BarChart} from "@/components/ui/chart-bar";
 
 const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
 const GET_METRICS_URL = import.meta.env.VITE_SERVER_URL + '/reports/model-metrics';
@@ -78,10 +79,25 @@ const parseParams = () => {
   return metadata.value.params;
 }
 
-const parsePredictionsContext = () => {
-  const context = latestPredictions.value[0];
-  console.log(context.keys.filter((key: string) => key !== 'prediction'));
-  return context.keys.filter((key: string) => key !== 'prediction');
+// const parsePredictionsContext = () => {
+//   const context = latestPredictions.value[0];
+//   return Object.keys(context).filter(key => key !== 'predictions' && key !== '_id' && key !== 'location_name');
+// }
+
+const aggregatePredictions = () => {
+  const predictions = latestPredictions.value;
+  return predictions.reduce((acc: any, prediction: any) => {
+    const keys = Object.keys(prediction);
+    keys.forEach(key => {
+      if (key !== 'predictions' && key !== '_id' && key !== 'location_name') {
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(prediction[key]);
+      }
+    });
+    return acc;
+  }, {});
 }
 </script>
 
@@ -93,20 +109,20 @@ const parsePredictionsContext = () => {
       <h2 class="font-bold mb-3">
         Production model: {{ currentLocation }}
       </h2>
-        <Card v-if="metadata">
-          <CardHeader>
-            <CardTitle>Model Metadata</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p><span class="font-bold">Model Name:</span> {{ metadata?.model_name }}</p>
-            <p><span class="font-bold">Run ID:</span> {{ metadata?.run_id }}</p>
-            <p><span class="font-bold">Start Time:</span> {{ formatDate(metadata?.start_time) }}</p>
-            <p><span class="font-bold">End Time:</span> {{ formatDate(metadata?.end_time) }}</p>
-            <p><span class="font-bold">Build Duration:</span>
-              {{ calculateDuration(metadata?.start_time, metadata?.end_time) }}</p>
-            <p><span class="font-bold">Status:</span> {{ metadata?.status }}</p>
-          </CardContent>
-        </Card>
+      <Card v-if="metadata">
+        <CardHeader>
+          <CardTitle>Model Metadata</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p><span class="font-bold">Model Name:</span> {{ metadata?.model_name }}</p>
+          <p><span class="font-bold">Run ID:</span> {{ metadata?.run_id }}</p>
+          <p><span class="font-bold">Start Time:</span> {{ formatDate(metadata?.start_time) }}</p>
+          <p><span class="font-bold">End Time:</span> {{ formatDate(metadata?.end_time) }}</p>
+          <p><span class="font-bold">Build Duration:</span>
+            {{ calculateDuration(metadata?.start_time, metadata?.end_time) }}</p>
+          <p><span class="font-bold">Status:</span> {{ metadata?.status }}</p>
+        </CardContent>
+      </Card>
       <Separator label="Metrics" class="my-3"/>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <Card v-for="(value, key) in metrics" :key="key">
@@ -122,9 +138,6 @@ const parsePredictionsContext = () => {
       </div>
       <Separator label="Parameters" class="my-3"/>
       <Table v-if="metadata">
-        <TableCaption>
-          Model Parameters
-        </TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Parameter</TableHead>
@@ -139,17 +152,23 @@ const parsePredictionsContext = () => {
         </TableBody>
       </Table>
       <Separator label="Predictions from production" class="my-3"/>
-      <Table v-if="latestPredictions">
-        <TableCaption>Predictions</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <!--TableHead for each key in latestPredictions except the prediction key -->
-            <TableHead v-for="(value, key) in parsePredictionsContext()" :key="key">
-              {{ normalizeKey(key.toString()) }}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-      </Table>
+      <!--      <Table v-if="latestPredictions" class="mt-3">-->
+      <!--        <TableHeader>-->
+      <!--          <TableRow>-->
+      <!--            <TableHead v-for="(value, key) in parsePredictionsContext()" :key="key">-->
+      <!--              {{ normalizeKey(value.toString()) }}-->
+      <!--            </TableHead>-->
+      <!--          </TableRow>-->
+      <!--        </TableHeader>-->
+      <!--        <TableBody>-->
+      <!--          <TableRow v-for="prediction in latestPredictions" :key="prediction._id">-->
+      <!--            <TableCell v-for="(value, key) in parsePredictionsContext()" :key="key">-->
+      <!--              {{ prediction[value] }}-->
+      <!--            </TableCell>-->
+      <!--          </TableRow>-->
+      <!--        </TableBody>-->
+      <!--      </Table>-->
+      <BarChart data="" index="" categories=""/>
     </div>
     <div v-else class="mb-7">
       <h2 class="font-bold">
