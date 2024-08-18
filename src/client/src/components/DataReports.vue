@@ -4,9 +4,9 @@ import ComboBox from "@/components/ComboBox.vue";
 import {Location} from "@/models";
 import L from "leaflet";
 
-const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
-const DATA_DRIFT_URL = import.meta.env.VITE_SERVER_URL + '/reports/data-drift';
-const DATA_STABILITY_URL = import.meta.env.VITE_SERVER_URL + '/reports/data-stability';
+const GET_LOCATIONS_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/locations';
+const DATA_DRIFT_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/reports/data-drift';
+const DATA_STABILITY_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/reports/data-stability';
 
 const locations: Ref<Array<Location>> = ref([]);
 const currentLocation = ref<string | null>(null);

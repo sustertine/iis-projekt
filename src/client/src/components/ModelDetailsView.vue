@@ -8,10 +8,10 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {Separator} from "@/components/ui/separator";
 import {AreaChart} from "@/components/ui/chart-area";
 
-const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
-const GET_METRICS_URL = import.meta.env.VITE_SERVER_URL + '/reports/model-metrics';
-const GET_METADATA_URL = import.meta.env.VITE_SERVER_URL + '/reports/model-metadata';
-const GET_LATEST_PREDICTIONS_URL = import.meta.env.VITE_SERVER_URL + '/reports/latest-predictions';
+const GET_LOCATIONS_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/locations';
+const GET_METRICS_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/reports/model-metrics';
+const GET_METADATA_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/reports/model-metadata';
+const GET_LATEST_PREDICTIONS_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/reports/latest-predictions';
 
 const locations: Ref<Array<Location>> = ref([]);
 const currentLocation = ref<string | null>(null);

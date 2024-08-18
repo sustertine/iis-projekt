@@ -6,8 +6,8 @@ import L from 'leaflet';
 import AQIPredictionCard from "@/components/AQIPredictionCard.vue";
 import {Card, CardContent} from "@/components/ui/card";
 
-const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
-const GET_PREDICTION_URL = import.meta.env.VITE_SERVER_URL + '/predict';
+const GET_LOCATIONS_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/locations';
+const GET_PREDICTION_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/predict';
 
 const locations: Ref<Array<Location>> = ref([]);
 const map = ref();
@@ -23,7 +23,6 @@ onMounted(() => {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map.value);
 
-  console.log(`Calling get locations at: ${import.meta.env.VITE_SERVER_URL}/locations`)
   fetch(GET_LOCATIONS_URL)
       .then(response => response.json())
       .then(data => {
