@@ -8,9 +8,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  train-evaluate-models:
+  tevaluate-production:
     runs-on: ubuntu-20.04
     permissions: write-all
+    env:
+      AIR_QUALITY_URL: ${{ secrets.AIR_QUALITY_URL }}
 
     steps:
       - uses: actions/checkout@v4
