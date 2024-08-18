@@ -1,4 +1,6 @@
+import concurrent.futures
 import json
+import logging
 import os
 from datetime import datetime, timedelta
 
@@ -13,6 +15,11 @@ from sklearn import set_config
 from src.data.fetch_air_quality_data import fetch_air_quality_data
 from src.data.fetch_weather_data import fetch_weather_data
 from src.serve.mongo import ApiCallsClient
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - [%(threadName)s/%(lineno)s] - %(levelname)s - %(message)s'
+)
 
 set_config(transform_output="pandas")
 
@@ -52,6 +59,34 @@ def get_current_data(location_name: str):
     return joined_data
 
 
+def load_model_components(city):
+    logging.info(f"STARTED loading model components for: {city}")
+    model_name = f"{city}_model"
+    pipeline_name = f"{city}_pipeline"
+    target_scaler_name = f"{city}_target_scaler"
+
+    latest_model_version = mlflow_client.get_latest_versions(model_name)
+    latest_pipeline_version = mlflow_client.get_latest_versions(pipeline_name)
+    latest_target_scaler_version = mlflow_client.get_latest_versions(target_scaler_name)
+
+    latest_model = mlflow_client.get_model_version(model_name, latest_model_version[-1].version)
+    latest_pipeline = mlflow_client.get_model_version(pipeline_name, latest_pipeline_version[-1].version)
+    latest_target_scaler = mlflow_client.get_model_version(target_scaler_name,
+                                                           latest_target_scaler_version[-1].version)
+
+    model_uri = f'runs:/{latest_model.run_id}/model'
+    pipeline_uri = f'runs:/{latest_pipeline.run_id}/{pipeline_name}'
+    target_scaler_uri = f'runs:/{latest_target_scaler.run_id}/{target_scaler_name}'
+
+    model = mlflow.pyfunc.load_model(model_uri)
+    pipeline = mlflow.sklearn.load_model(pipeline_uri)
+    target_scaler = mlflow.sklearn.load_model(target_scaler_uri)
+
+    logging.info(f"COMPLETED loading model components for: {city}")
+
+    return (model_name, model), (pipeline_name, pipeline), (target_scaler_name, target_scaler)
+
+
 class AQIPredictor:
 
     def __init__(self):
@@ -59,58 +94,54 @@ class AQIPredictor:
 
         with open('resources/cities.json') as f:
             cities = dict(json.load(f))
-            for city in cities:
-                model_name = f"{city}_model"
-                pipeline_name = f"{city}_pipeline"
-                target_scaler_name = f"{city}_target_scaler"
 
-                latest_model_version = mlflow_client.get_latest_versions(model_name)
-                latest_pipeline_version = mlflow_client.get_latest_versions(pipeline_name)
-                latest_target_scaler_version = mlflow_client.get_latest_versions(target_scaler_name)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            start_time = datetime.now()
 
-                latest_model = mlflow_client.get_model_version(model_name, latest_model_version[-1].version)
-                latest_pipeline = mlflow_client.get_model_version(pipeline_name, latest_pipeline_version[-1].version)
-                latest_target_scaler = mlflow_client.get_model_version(target_scaler_name,
-                                                                       latest_target_scaler_version[-1].version)
+            future_to_city = {executor.submit(load_model_components, city): city for city in cities}
+            for future in concurrent.futures.as_completed(future_to_city):
+                city = future_to_city[future]
+                try:
+                    model_tuple, pipeline_tuple, target_scaler_tuple = future.result()
+                    self.model_map[model_tuple[0]] = model_tuple[1]
+                    self.model_map[pipeline_tuple[0]] = pipeline_tuple[1]
+                    self.model_map[target_scaler_tuple[0]] = target_scaler_tuple[1]
+                except Exception as exc:
+                    print(f'{city} generated an exception: {exc}')
 
-                model_uri = f'runs:/{latest_model.run_id}/model'
-                pipeline_uri = f'runs:/{latest_pipeline.run_id}/{pipeline_name}'
-                target_scaler_uri = f'runs:/{latest_target_scaler.run_id}/{target_scaler_name}'
+        logging.info(f"COMPLETED loading all model components in: {datetime.now() - start_time}s")
 
-                self.model_map[model_name] = mlflow.pyfunc.load_model(model_uri)
-                self.model_map[pipeline_name] = mlflow.sklearn.load_model(pipeline_uri)
-                self.model_map[target_scaler_name] = mlflow.sklearn.load_model(target_scaler_uri)
 
-    def predict(self, location_name: str):
-        if f'{location_name}_model' not in self.model_map:
-            raise HTTPException(status_code=404, detail=f"Model for location {location_name} not found")
-        current_date_time = datetime.now()
-        data = get_current_data(location_name)
+def predict(self, location_name: str):
+    if f'{location_name}_model' not in self.model_map:
+        raise HTTPException(status_code=404, detail=f"Model for location {location_name} not found")
+    current_date_time = datetime.now()
+    data = get_current_data(location_name)
 
-        data_dict = data.to_dict(orient='records')[0]
-        data_dict['location_name'] = location_name
-        data_dict['time'] = current_date_time.isoformat()
+    data_dict = data.to_dict(orient='records')[0]
+    data_dict['location_name'] = location_name
+    data_dict['time'] = current_date_time.isoformat()
 
-        current_aqi = self.model_map[f'{location_name}_target_scaler'].transform(
-            data['european_aqi'].values.reshape(-1, 1))
-        data = self.model_map[f'{location_name}_pipeline'].transform(data)
-        data['european_aqi'] = current_aqi
-        data.dropna(inplace=True)
+    current_aqi = self.model_map[f'{location_name}_target_scaler'].transform(
+        data['european_aqi'].values.reshape(-1, 1))
+    data = self.model_map[f'{location_name}_pipeline'].transform(data)
+    data['european_aqi'] = current_aqi
+    data.dropna(inplace=True)
 
-        data = np.expand_dims(data.values, axis=0)
-        prediction = self.model_map[f'{location_name}_model'].predict(data)
-        prediction = self.model_map[f'{location_name}_target_scaler'].inverse_transform(prediction)
+    data = np.expand_dims(data.values, axis=0)
+    prediction = self.model_map[f'{location_name}_model'].predict(data)
+    prediction = self.model_map[f'{location_name}_target_scaler'].inverse_transform(prediction)
 
-        prediction = prediction.flatten().tolist()
-        predictions_list = []
-        for i in range(len(prediction)):
-            future_time = current_date_time + timedelta(hours=i + 1)
-            predictions_list.append({
-                'time': future_time.strftime('%d-%m-%Y %H:%M:%S'),
-                'aqi': prediction[i]
-            })
+    prediction = prediction.flatten().tolist()
+    predictions_list = []
+    for i in range(len(prediction)):
+        future_time = current_date_time + timedelta(hours=i + 1)
+        predictions_list.append({
+            'time': future_time.strftime('%d-%m-%Y %H:%M:%S'),
+            'aqi': prediction[i]
+        })
 
-        data_dict['predictions'] = predictions_list
-        api_calls_client.create_api_call(data_dict)
+    data_dict['predictions'] = predictions_list
+    api_calls_client.create_api_call(data_dict)
 
-        return predictions_list
+    return predictions_list
