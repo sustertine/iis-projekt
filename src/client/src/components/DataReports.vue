@@ -52,13 +52,30 @@ const onLocationSelected = async (selectedLocation: Location) => {
 </script>
 
 <template>
-  <ComboBox :locations="locations" @location-selected="onLocationSelected" class="mb-7"/>
-  <div class="html-container mb-7" v-html="dataDriftHtmlContent"></div>
-  <div class="html-container" v-html="dataStabilityHtmlContent"></div>
+  <div class="flex flex-col text-center">
+    <ComboBox :locations="locations" @location-selected="onLocationSelected" class="mb-7" />
+
+    <div v-if="currentLocation" class="mb-7">
+      <h2 class="font-bold">
+        Data Drift and Data Stability reports for {{ currentLocation }}
+      </h2>
+      <div class="html-container-drift mb-7" v-html="dataDriftHtmlContent"></div>
+      <div class="html-container-stability" v-html="dataStabilityHtmlContent"></div>
+    </div>
+
+    <div v-else class="mb-7">
+      <h2 class="font-bold">
+        Please select a location to view reports.
+      </h2>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.html-container > * {
-  height: 500px;
+.html-container-drift > * {
+  height: 1500px;
+}
+.html-container-stability > * {
+  height: 6600px;
 }
 </style>
