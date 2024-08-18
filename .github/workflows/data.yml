@@ -3,9 +3,9 @@ name: Data Pipeline
 on:
   schedule:
     - cron: '0 0,12 * * *'
-  push:
-    branches:
-      - develop
+#  push:
+#    branches:
+#      - develop
 
 jobs:
   fetch-air-quality-data:
