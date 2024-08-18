@@ -23,6 +23,7 @@ onMounted(() => {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map.value);
 
+  console.log('Calling get locations at: '+ GET_LOCATIONS_URL)
   fetch(GET_LOCATIONS_URL)
       .then(response => response.json())
       .then(data => {
