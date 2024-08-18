@@ -1,9 +1,10 @@
 <script setup lang="ts">
 
+import DataReports from "@/components/DataReports.vue";
 </script>
 
 <template>
-<h1>Dashboard view</h1>
+  <DataReports></DataReports>
 </template>
 
 <style scoped>

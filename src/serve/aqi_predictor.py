@@ -60,6 +60,7 @@ class AQIPredictor:
         with open('resources/cities.json') as f:
             cities = dict(json.load(f))
             for city in cities:
+                break
                 model_name = f"{city}_model"
                 pipeline_name = f"{city}_pipeline"
                 target_scaler_name = f"{city}_target_scaler"
@@ -80,7 +81,6 @@ class AQIPredictor:
                 self.model_map[model_name] = mlflow.pyfunc.load_model(model_uri)
                 self.model_map[pipeline_name] = mlflow.sklearn.load_model(pipeline_uri)
                 self.model_map[target_scaler_name] = mlflow.sklearn.load_model(target_scaler_uri)
-            
 
     def predict(self, location_name: str):
         if f'{location_name}_model' not in self.model_map:

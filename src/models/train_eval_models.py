@@ -130,10 +130,19 @@ def train_model(city, epochs):
     model = create_model(X.shape[1], X.shape[2])
     model.fit(X, y, epochs=epochs, batch_size=32, verbose=2)
 
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    converter.target_spec.supported_ops = [
+        tf.lite.OpsSet.TFLITE_BUILTINS,
+        tf.lite.OpsSet.SELECT_TF_OPS
+    ]
+    converter._experimental_lower_tensor_list_ops = False
+    tflite_model = converter.convert()
 
-    model.save(f"{MODELS_DIR}/{city}/model.h5")
-    mlflow.log_artifact(f"{MODELS_DIR}/{city}/model.h5")
-    mlflow.register_model(f'runs:/{mlflow.active_run().info.run_id}/{city}/model', f'{city}_model')
+    with open(f"{MODELS_DIR}/{city}/model.tflite", "wb") as f:
+        f.write(tflite_model)
+
+    mlflow.log_artifact(f"{MODELS_DIR}/{city}/model.tflite")
+    mlflow.register_model(f'runs:/{mlflow.active_run().info.run_id}/{city}/model', f'{city}_model_tflite')
 
 
 def process_city(city):
@@ -150,7 +159,6 @@ def main():
 
     for city in cities:
         process_city(city)
-        break
 
     end_time = time.time()
     execution_time = end_time - start_time

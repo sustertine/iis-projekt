@@ -1,0 +1,64 @@
+<script setup lang="ts">
+import {onMounted, Ref, ref} from "vue";
+import ComboBox from "@/components/ComboBox.vue";
+import {Location} from "@/models";
+import L from "leaflet";
+
+const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
+const DATA_DRIFT_URL = import.meta.env.VITE_SERVER_URL + '/reports/data-drift';
+const DATA_STABILITY_URL = import.meta.env.VITE_SERVER_URL + '/reports/data-stability';
+
+const locations: Ref<Array<Location>> = ref([]);
+const currentLocation = ref<string | null>(null);
+
+const dataDriftHtmlContent = ref<string>("");
+const dataStabilityHtmlContent = ref<string>("");
+
+onMounted(async () => {
+
+  fetch(GET_LOCATIONS_URL)
+      .then(response => response.json())
+      .then(data => {
+        locations.value = data;
+      });
+
+});
+
+const onLocationSelected = async (selectedLocation: Location) => {
+  currentLocation.value = selectedLocation.name;
+
+  try {
+    const response = await fetch(DATA_DRIFT_URL + '/' + currentLocation.value);
+    if (response.ok) {
+      dataDriftHtmlContent.value = await response.text();
+    } else {
+      console.error('Failed to fetch HTML:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching HTML:', error);
+  }
+
+  try {
+    const response = await fetch(DATA_STABILITY_URL + '/' + currentLocation.value);
+    if (response.ok) {
+      dataStabilityHtmlContent.value = await response.text();
+    } else {
+      console.error('Failed to fetch HTML:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching HTML:', error);
+  }
+}
+</script>
+
+<template>
+  <ComboBox :locations="locations" @location-selected="onLocationSelected"/>
+  <div class="html-container mb-7" v-html="dataDriftHtmlContent"></div>
+  <div class="html-container" v-html="dataStabilityHtmlContent"></div>
+</template>
+
+<style scoped>
+.html-container > * {
+  height: 500px;
+}
+</style>

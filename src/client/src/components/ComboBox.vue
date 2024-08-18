@@ -58,7 +58,7 @@ const handleSelection = (event: any) => {
     <PopoverContent class="w-[200px] p-0">
       <Command>
         <CommandInput class="h-9" placeholder="Search location..." />
-        <CommandEmpty>No framework found.</CommandEmpty>
+        <CommandEmpty>No locations found.</CommandEmpty>
         <CommandList>
           <CommandGroup>
             <CommandItem
