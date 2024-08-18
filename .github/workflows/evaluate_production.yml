@@ -5,6 +5,7 @@ on:
     workflows: [ "Data pipeline" ]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   train-evaluate-models:
