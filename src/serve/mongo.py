@@ -1,5 +1,7 @@
 import os
 
+import numpy as np
+from bson import ObjectId
 from pymongo import MongoClient
 
 from dotenv import load_dotenv
@@ -30,4 +32,5 @@ class ApiCallsClient:
     def create_api_call(self, data):
         self.api_calls.insert_one(data)
 
-
+    def add_actual(self, _id, evaluated_predictions):
+        self.api_calls.update_one({'_id': ObjectId(_id)}, {'$set': {'evaluated_predictions': evaluated_predictions}})

@@ -7,6 +7,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Separator} from "@/components/ui/separator";
 import {BarChart} from "@/components/ui/chart-bar";
+import {AreaChart} from "@/components/ui/chart-area";
 
 const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
 const GET_METRICS_URL = import.meta.env.VITE_SERVER_URL + '/reports/model-metrics';
@@ -79,25 +80,11 @@ const parseParams = () => {
   return metadata.value.params;
 }
 
-// const parsePredictionsContext = () => {
-//   const context = latestPredictions.value[0];
-//   return Object.keys(context).filter(key => key !== 'predictions' && key !== '_id' && key !== 'location_name');
-// }
-
-const aggregatePredictions = () => {
-  const predictions = latestPredictions.value;
-  return predictions.reduce((acc: any, prediction: any) => {
-    const keys = Object.keys(prediction);
-    keys.forEach(key => {
-      if (key !== 'predictions' && key !== '_id' && key !== 'location_name') {
-        if (!acc[key]) {
-          acc[key] = [];
-        }
-        acc[key].push(prediction[key]);
-      }
-    });
-    return acc;
-  }, {});
+const reduceAndSortPredictions = () => {
+  const allPredictions = latestPredictions.value.flatMap(data => data.predictions);
+  allPredictions.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+  console.log(allPredictions)
+  return allPredictions;
 }
 </script>
 
@@ -152,23 +139,10 @@ const aggregatePredictions = () => {
         </TableBody>
       </Table>
       <Separator label="Predictions from production" class="my-3"/>
-      <!--      <Table v-if="latestPredictions" class="mt-3">-->
-      <!--        <TableHeader>-->
-      <!--          <TableRow>-->
-      <!--            <TableHead v-for="(value, key) in parsePredictionsContext()" :key="key">-->
-      <!--              {{ normalizeKey(value.toString()) }}-->
-      <!--            </TableHead>-->
-      <!--          </TableRow>-->
-      <!--        </TableHeader>-->
-      <!--        <TableBody>-->
-      <!--          <TableRow v-for="prediction in latestPredictions" :key="prediction._id">-->
-      <!--            <TableCell v-for="(value, key) in parsePredictionsContext()" :key="key">-->
-      <!--              {{ prediction[value] }}-->
-      <!--            </TableCell>-->
-      <!--          </TableRow>-->
-      <!--        </TableBody>-->
-      <!--      </Table>-->
-      <BarChart data="" index="" categories=""/>
+      <h1>
+        AQI Predictions
+      </h1>
+      <AreaChart v-if="latestPredictions" :data="reduceAndSortPredictions()" index="time" :categories="['aqi']" :colors="['#3182CE']"/>
     </div>
     <div v-else class="mb-7">
       <h2 class="font-bold">
