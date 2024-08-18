@@ -2,6 +2,7 @@
 
 import DataReports from "@/components/DataReports.vue";
 import {Tabs, TabsList, TabsTrigger, TabsContent} from "@/components/ui/tabs";
+import ModelDetailsView from "@/components/ModelDetailsView.vue";
 </script>
 
 <template>
@@ -15,10 +16,10 @@ import {Tabs, TabsList, TabsTrigger, TabsContent} from "@/components/ui/tabs";
       </TabsTrigger>
     </TabsList>
     <TabsContent value="models">
-      <h1>Models view</h1>
+      <ModelDetailsView/>
     </TabsContent>
     <TabsContent value="data">
-      <DataReports></DataReports>
+      <DataReports/>
     </TabsContent>
   </Tabs>
 </template>

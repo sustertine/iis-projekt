@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.serve.location_info_service import get_locations_info
 from src.serve.aqi_predictor import AQIPredictor
+from src.serve.metrics_service import get_production_metrics, get_model_metadata
 from src.serve.mongo import ApiCallsClient
 from src.util.constants import REPORTS_DIR
 
@@ -38,12 +39,12 @@ def get_locations():
     return get_locations_info()
 
 
-@app.get("/api/predict-aqi/{location_name}")
+@app.get("/api/predict/{location_name}")
 def predict_aqi(location_name: str):
     return predictor.predict(location_name)
 
 
-@app.get("/api/predictions/{location_name}")
+@app.get("/api/reports/latest-predictions/{location_name}")
 def get_predictions(location_name: str):
     return api_calls_client.get_api_calls_by_location(location_name)
 
@@ -70,3 +71,13 @@ def get_data_stability(location_name: str):
         return HTMLResponse(content=html_content)
     else:
         raise HTTPException(status_code=404, detail="File not found")
+
+
+@app.get("/api/reports/model-metrics/{location_name}")
+def get_model_metrics(location_name: str):
+    return get_production_metrics(location_name)
+
+
+@app.get("/api/reports/model-metadata/{location_name}")
+def get_metadata_for_model(location_name: str):
+    return get_model_metadata(location_name)

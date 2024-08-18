@@ -7,7 +7,7 @@ import AQIPredictionCard from "@/components/AQIPredictionCard.vue";
 import {Card, CardContent} from "@/components/ui/card";
 
 const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
-const GET_PREDICTION_URL = import.meta.env.VITE_SERVER_URL + '/predict-aqi';
+const GET_PREDICTION_URL = import.meta.env.VITE_SERVER_URL + '/predict';
 
 const locations: Ref<Array<Location>> = ref([]);
 const map = ref();
@@ -52,9 +52,12 @@ const onLocationSelected = (selectedLocation: Location) => {
       <ComboBox :locations="locations" @location-selected="onLocationSelected"/>
       <AQIPredictionCard :location="currentLocation" :predictions="predictions" v-if="predictions && currentLocation"/>
     </div>
-      <div ref="mapContainer" style="width: 100%; height: 45rem"></div>
+      <div ref="mapContainer" style="width: 100%; height: 45rem" class="map"></div>
   </div>
 </template>
 
 <style scoped>
+.map * {
+  z-index: 0;
+}
 </style>
