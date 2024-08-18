@@ -88,7 +88,6 @@ def load_model_components(city):
 
 
 class AQIPredictor:
-
     def __init__(self):
         self.model_map = {}
 

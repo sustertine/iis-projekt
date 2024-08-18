@@ -6,7 +6,6 @@ import ComboBox from "@/components/ComboBox.vue";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Separator} from "@/components/ui/separator";
-import {BarChart} from "@/components/ui/chart-bar";
 import {AreaChart} from "@/components/ui/chart-area";
 
 const GET_LOCATIONS_URL = import.meta.env.VITE_SERVER_URL + '/locations';
@@ -81,7 +80,8 @@ const parseParams = () => {
 }
 
 const reduceAndSortPredictions = () => {
-  const allPredictions = latestPredictions.value.flatMap((data: Record<string, any>) => data.evaluated_predictions);
+  const allPredictions = latestPredictions.value.flatMap((data: Record<string, any>) => data.evaluated_predictions)
+      .filter((data: Record<string, any>) => data !== undefined && data !== null);
   return allPredictions;
 }
 </script>
