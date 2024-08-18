@@ -1,7 +1,6 @@
 import json
 import os
 from datetime import datetime, timedelta
-from random import random
 
 import mlflow.pyfunc
 import numpy as np
@@ -13,7 +12,7 @@ from sklearn import set_config
 
 from src.data.fetch_air_quality_data import fetch_air_quality_data
 from src.data.fetch_weather_data import fetch_weather_data
-from src.models.train_eval_models import create_windows
+from src.serve.mongo import ApiCallsClient
 
 set_config(transform_output="pandas")
 
@@ -22,7 +21,8 @@ mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI'))
 username = os.getenv('MLFLOW_TRACKING_USERNAME')
 password = os.getenv('MLFLOW_TRACKING_PASSWORD')
 
-client = MlflowClient()
+mlflow_client = MlflowClient()
+api_calls_client = ApiCallsClient()
 
 
 def get_current_data(location_name: str):
@@ -41,9 +41,15 @@ def get_current_data(location_name: str):
     air_quality_data.set_index('time', inplace=True)
     air_quality_data.sort_index(inplace=True)
 
-    weather_data = weather_data.tail(24)
-    air_quality_data = air_quality_data.tail(24)
-    return pd.concat([weather_data, air_quality_data], axis=1)
+    common_times = weather_data.index.intersection(air_quality_data.index)
+
+    common_times = common_times[-24:]
+
+    weather_data = weather_data.loc[common_times]
+    air_quality_data = air_quality_data.loc[common_times]
+
+    joined_data = pd.merge(weather_data, air_quality_data, left_index=True, right_index=True)
+    return joined_data
 
 
 class AQIPredictor:
@@ -58,14 +64,14 @@ class AQIPredictor:
                 pipeline_name = f"{city}_pipeline"
                 target_scaler_name = f"{city}_target_scaler"
 
-                latest_model_version = client.get_latest_versions(model_name)
-                latest_pipeline_version = client.get_latest_versions(pipeline_name)
-                latest_target_scaler_version = client.get_latest_versions(target_scaler_name)
+                latest_model_version = mlflow_client.get_latest_versions(model_name)
+                latest_pipeline_version = mlflow_client.get_latest_versions(pipeline_name)
+                latest_target_scaler_version = mlflow_client.get_latest_versions(target_scaler_name)
 
-                latest_model = client.get_model_version(model_name, latest_model_version[-1].version)
-                latest_pipeline = client.get_model_version(pipeline_name, latest_pipeline_version[-1].version)
-                latest_target_scaler = client.get_model_version(target_scaler_name,
-                                                                latest_target_scaler_version[-1].version)
+                latest_model = mlflow_client.get_model_version(model_name, latest_model_version[-1].version)
+                latest_pipeline = mlflow_client.get_model_version(pipeline_name, latest_pipeline_version[-1].version)
+                latest_target_scaler = mlflow_client.get_model_version(target_scaler_name,
+                                                                       latest_target_scaler_version[-1].version)
 
                 model_uri = f'runs:/{latest_model.run_id}/model'
                 pipeline_uri = f'runs:/{latest_pipeline.run_id}/{pipeline_name}'
@@ -74,13 +80,20 @@ class AQIPredictor:
                 self.model_map[model_name] = mlflow.pyfunc.load_model(model_uri)
                 self.model_map[pipeline_name] = mlflow.sklearn.load_model(pipeline_uri)
                 self.model_map[target_scaler_name] = mlflow.sklearn.load_model(target_scaler_uri)
+            
 
     def predict(self, location_name: str):
         if f'{location_name}_model' not in self.model_map:
             raise HTTPException(status_code=404, detail=f"Model for location {location_name} not found")
         current_date_time = datetime.now()
         data = get_current_data(location_name)
-        current_aqi = self.model_map[f'{location_name}_target_scaler'].transform(data['european_aqi'].values.reshape(-1, 1))
+
+        data_dict = data.to_dict(orient='records')[0]
+        data_dict['location_name'] = location_name
+        data_dict['time'] = current_date_time.isoformat()
+
+        current_aqi = self.model_map[f'{location_name}_target_scaler'].transform(
+            data['european_aqi'].values.reshape(-1, 1))
         data = self.model_map[f'{location_name}_pipeline'].transform(data)
         data['european_aqi'] = current_aqi
         data.dropna(inplace=True)
@@ -97,5 +110,8 @@ class AQIPredictor:
                 'time': future_time.strftime('%d-%m-%Y %H:%M:%S'),
                 'aqi': prediction[i]
             })
+
+        data_dict['predictions'] = predictions_list
+        api_calls_client.create_api_call(data_dict)
 
         return predictions_list

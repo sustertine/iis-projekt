@@ -9,6 +9,8 @@ import time
 from keras import Sequential
 from keras.layers import LSTM, Dense
 
+import tensorflow as tf
+
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -128,6 +130,7 @@ def train_model(city, epochs):
     model = create_model(X.shape[1], X.shape[2])
     model.fit(X, y, epochs=epochs, batch_size=32, verbose=2)
 
+
     model.save(f"{MODELS_DIR}/{city}/model.h5")
     mlflow.log_artifact(f"{MODELS_DIR}/{city}/model.h5")
     mlflow.register_model(f'runs:/{mlflow.active_run().info.run_id}/{city}/model', f'{city}_model')
@@ -147,6 +150,7 @@ def main():
 
     for city in cities:
         process_city(city)
+        break
 
     end_time = time.time()
     execution_time = end_time - start_time

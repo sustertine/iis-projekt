@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.serve.location_info_service import get_locations_info
 from src.serve.aqi_predictor import AQIPredictor
+from src.serve.mongo import ApiCallsClient
 
 app = FastAPI()
 
@@ -20,6 +21,7 @@ app.add_middleware(
 )
 
 predictor = AQIPredictor()
+api_calls_client = ApiCallsClient()
 
 
 @app.get("/", include_in_schema=False)
@@ -35,3 +37,8 @@ def get_locations():
 @app.get("/api/predict-aqi/{location_name}")
 def predict_aqi(location_name: str):
     return predictor.predict(location_name)
+
+
+@app.get("/api/predictions/{location_name}")
+def get_predictions(location_name: str):
+    return api_calls_client.get_api_calls_by_location(location_name)
