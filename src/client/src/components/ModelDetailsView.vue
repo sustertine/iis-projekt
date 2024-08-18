@@ -82,9 +82,6 @@ const parseParams = () => {
 
 const reduceAndSortPredictions = () => {
   const allPredictions = latestPredictions.value.flatMap((data: Record<string, any>) => data.evaluated_predictions);
-  allPredictions.forEach((prediction: Record<string, any>) => {
-    prediction.time = new Date(prediction.time).toLocaleTimeString();
-  });
   return allPredictions;
 }
 </script>
