@@ -1,14 +1,12 @@
 name: Evaluate production predictions
 
 on:
-  workflow_run:
-    workflows: [ "Data pipeline" ]
-    types:
-      - completed
+  schedule:
+    - cron: '0 0,8,16 * * *'
   workflow_dispatch:
 
 jobs:
-  tevaluate-production:
+  evaluate-production:
     runs-on: ubuntu-20.04
     permissions: write-all
     env:
