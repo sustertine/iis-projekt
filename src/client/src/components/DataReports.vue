@@ -52,7 +52,7 @@ const onLocationSelected = async (selectedLocation: Location) => {
 </script>
 
 <template>
-  <ComboBox :locations="locations" @location-selected="onLocationSelected"/>
+  <ComboBox :locations="locations" @location-selected="onLocationSelected" class="mb-7"/>
   <div class="html-container mb-7" v-html="dataDriftHtmlContent"></div>
   <div class="html-container" v-html="dataStabilityHtmlContent"></div>
 </template>
