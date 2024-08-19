@@ -6,8 +6,12 @@ import L from 'leaflet';
 import AQIPredictionCard from "@/components/AQIPredictionCard.vue";
 import {Card, CardContent} from "@/components/ui/card";
 
+// const GET_LOCATIONS_URL = 'http://localhost:8000/api' + '/locations';
+// const GET_PREDICTION_URL = 'http://localhost:8000/api' + '/predict';
+
 const GET_LOCATIONS_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/locations';
 const GET_PREDICTION_URL = 'https://backend-production-ce7e.up.railway.app/api' + '/predict';
+
 
 const locations: Ref<Array<Location>> = ref([]);
 const map = ref();
