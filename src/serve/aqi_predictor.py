@@ -123,8 +123,9 @@ class AQIPredictor:
         current_aqi = self.model_map[f'{location_name}_target_scaler'].transform(
             data['european_aqi'].values.reshape(-1, 1))
         data = self.model_map[f'{location_name}_pipeline'].transform(data)
+
         data['european_aqi'] = current_aqi
-        data.dropna(inplace=True)
+        data.fillna(data.mean(), inplace=True)
 
         data = np.expand_dims(data.values, axis=0)
         prediction = self.model_map[f'{location_name}_model'].predict(data)
